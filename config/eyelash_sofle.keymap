@@ -1,5 +1,13 @@
-#define ZMK_POINTING_DEFAULT_MOVE_VAL 1200  // 600
-#define ZMK_POINTING_DEFAULT_SCRL_VAL 25   // 10
+/*
+ * Sofle user keymap.
+ *
+ * Each binding row is ordered left-to-right as: six left keys, one joystick
+ * direction/click, then six right keys. The fifth row contains the thumbs
+ * and the joystick click. `&trans` inherits the binding from the next active
+ * layer, which keeps unassigned function-layer keys usable.
+ */
+#define ZMK_POINTING_DEFAULT_MOVE_VAL 1200
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 25
 
 #include <input/processors.dtsi>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
@@ -11,26 +19,31 @@
 #include <dt-bindings/zmk/pointing.h>
 #include <dt-bindings/zmk/rgb.h>
 
+/* Scale joystick pointer movement before it is sent as a mouse report. */
 &mmv_input_listener { input-processors = <&zip_xy_scaler 2 1>; };
 
+/* Scale encoder-driven scrolling independently from pointer movement. */
 &msc_input_listener { input-processors = <&zip_scroll_scaler 2 1>; };
 
 &msc {
-    acceleration-exponent = <1>;      // 0
-    time-to-max-speed-ms = <100>;       // 300
-    delay-ms = <0>;                   // 0
+    acceleration-exponent = <1>;
+    time-to-max-speed-ms = <100>;
+    delay-ms = <0>;
 };
 
+/* Make joystick cursor movement accelerate smoothly rather than jump. */
 &mmv {
     time-to-max-speed-ms = <500>;
     acceleration-exponent = <1>;
     trigger-period-ms = <16>;
 };
 
+/* Require a two-second hold before the deep-sleep behavior takes effect. */
 &soft_off { hold-time-ms = <2000>; };
 
 / {
     scroll_encoder: scroll_encoder {
+        /* Standard encoder behavior used where rotation should scroll. */
         compatible = "zmk,behavior-sensor-rotate";
         #sensor-binding-cells = <0>;
         bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
@@ -39,7 +52,22 @@
     };
 
     behaviors {
+        status_profile: status_profile {
+            compatible = "zmk,behavior-eyelash-status-led";
+            #binding-cells = <0>;
+            action = <0>;
+            label = "STATUS_PROFILE";
+        };
+
+        status_battery: status_battery {
+            compatible = "zmk,behavior-eyelash-status-led";
+            #binding-cells = <0>;
+            action = <1>;
+            label = "STATUS_BATTERY";
+        };
+
         rsr_vol: rsr_vol {
+            /* Runtime-selectable encoder behavior for volume adjustment. */
             compatible = "zmk,behavior-runtime-sensor-rotate";
             #sensor-binding-cells = <0>;
             tap-ms = <5>;
@@ -48,9 +76,19 @@
         };
 
         rsr_trans: rsr_trans {
+            /* Preserve the active encoder behavior on transparent layers. */
             compatible = "zmk,behavior-runtime-sensor-rotate";
             #sensor-binding-cells = <0>;
             tap-ms = <0>;
+        };
+
+        rsr_zoom: rsr_zoom {
+            /* Layer 2 converts encoder rotation to application zoom. */
+            compatible = "zmk,behavior-runtime-sensor-rotate";
+            #sensor-binding-cells = <0>;
+            tap-ms = <5>;
+            cw-binding = <&ZOOM_IN>;
+            ccw-binding = <&ZOOM_OUT>;
         };
     };
 
@@ -58,6 +96,7 @@
         compatible = "zmk,combos";
 
         softoff {
+            /* Q + S + Z invokes the protected soft-off behavior above. */
             bindings = <&soft_off>;
             key-positions = <14 28 40>;
         };
@@ -78,74 +117,168 @@
 
             label = "SHIFT_MCLK";
         };
+
+        ALT_TAB: ALT_TAB {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LEFT_ALT>,
+                <&macro_tap>,
+                <&kp TAB>,
+                <&macro_release>,
+                <&kp LEFT_ALT>;
+            label = "ALT_TAB";
+        };
+
+        ALT_ESC: ALT_ESC {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LEFT_ALT>,
+                <&macro_tap>,
+                <&kp ESC>,
+                <&macro_release>,
+                <&kp LEFT_ALT>;
+            label = "ALT_ESC";
+        };
+
+        CTRL_TAB: CTRL_TAB {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LCTRL>,
+                <&macro_tap>,
+                <&kp TAB>,
+                <&macro_release>,
+                <&kp LCTRL>;
+            label = "CTRL_TAB";
+        };
+
+        CTRL_SHIFT_TAB: CTRL_SHIFT_TAB {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LCTRL &kp LEFT_SHIFT>,
+                <&macro_tap>,
+                <&kp TAB>,
+                <&macro_release>,
+                <&kp LCTRL &kp LEFT_SHIFT>;
+            label = "CTRL_SHIFT_TAB";
+        };
+
+        GUI_TAB: GUI_TAB {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LEFT_GUI>,
+                <&macro_tap>,
+                <&kp TAB>,
+                <&macro_release>,
+                <&kp LEFT_GUI>;
+            label = "GUI_TAB";
+        };
+
+        ZOOM_IN: ZOOM_IN {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LCTRL>,
+                <&macro_tap>,
+                <&kp PLUS>,
+                <&macro_release>,
+                <&kp LCTRL>;
+            label = "ZOOM_IN";
+        };
+
+        ZOOM_OUT: ZOOM_OUT {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LCTRL>,
+                <&macro_tap>,
+                <&kp MINUS>,
+                <&macro_release>,
+                <&kp LCTRL>;
+            label = "ZOOM_OUT";
+        };
+
+        RESET_ZOOM: RESET_ZOOM {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LCTRL>,
+                <&macro_tap>,
+                <&kp N0>,
+                <&macro_release>,
+                <&kp LCTRL>;
+            label = "RESET_ZOOM";
+        };
+
+        TAB_LED: TAB_LED {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&rgb_ug RGB_ON &rgb_ug RGB_COLOR_HSB(255,0,0) &kp CAPS>; 
+        };
     };
 
     keymap {
         compatible = "zmk,keymap";
 
         layer0 {
+            /* Base typing layer; the central column is the joystick. */
             bindings = <
-&kp ESC     &kp N1     &kp N2        &kp N3        &kp N4  &kp N5       &kp UP_ARROW     &kp N6     &kp N7     &kp N8     &kp N9           &kp N0      &kp BACKSPACE
-&kp TAB     &kp Q      &kp W         &kp E         &kp R   &kp T        &kp DOWN_ARROW   &kp Y      &kp U      &kp I      &kp O            &kp P       &kp BSLH
-&kp CAPS    &kp A      &kp S         &kp D         &kp F   &kp G        &kp LEFT_ARROW   &kp H      &kp J      &kp K      &kp L            &kp SEMI    &kp APOS
-&kp LSHFT   &kp Z      &kp X         &kp C         &kp V   &kp B        &kp RIGHT_ARROW  &kp N      &kp M      &kp COMMA  &kp DOT          &kp FSLH    &kp ENTER
-&kp C_MUTE  &kp LCTRL  &kp LEFT_GUI  &kp LEFT_ALT  &mo 1   &kp SPACE    &kp ENTER        &kp SPACE  &kp ENTER  &mo 2      &kp RIGHT_SHIFT  &kp DELETE
-            >;
+                &kp ESC         &kp N1          &kp N2              &kp N3              &kp N4          &kp N5              &kp UP_ARROW        &kp N6          &kp N7          &kp N8           &kp N9     &kp N0              &kp DELETE
+                &TAB_LED        &kp Q           &kp W               &kp E               &kp R           &kp T               &kp DOWN_ARROW      &kp Y           &kp U           &kp I            &kp O      &kp P               &kp BACKSPACE
+                &kp CAPS        &kp A           &kp S               &kp D               &kp F           &kp G               &kp LEFT_ARROW      &kp H           &kp J           &kp K            &kp L      &kp SEMI            &kp APOS
+                &kp LSHFT       &kp Z           &kp X               &kp C               &kp V           &kp B               &kp RIGHT_ARROW     &kp N           &kp M           &kp COMMA        &kp DOT    &kp FSLH            &kp ENTER
+                &kp C_MUTE      &kp LCTRL       &kp LEFT_GUI        &kp LEFT_ALT        &mo 1           &kp SPACE           &kp ENTER           &kp SPACE       &mo 2           &kp RIGHT_SHIFT  &kp PSCRN  &kp LCTRL
+            >; 
 
+            /* Encoder rotation controls volume on the base layer. */
             sensor-bindings = <&rsr_vol &rsr_trans>;
             display-name = "LAYER0";
         };
 
         layer_1 {
+            /* Navigation, mouse, media, and RGB controls. */
             bindings = <
-&kp GRAVE   &kp F1           &kp F2          &kp F3           &kp F4           &kp F5             &mmv MOVE_UP     &kp F6           &kp F7           &kp F8      &kp F9     &kp F10           &trans
-&trans      &kp GRAVE        &mkp LCLK       &mkp MCLK        &mkp RCLK        &mkp MB4           &mmv MOVE_DOWN   &kp PG_UP        &kp END          &kp UP      &kp HOME   &kp MINUS         &kp EQUAL
-&trans      &kp TILDE        &trans          &trans           &trans           &mkp MB5           &mmv MOVE_LEFT   &kp PG_DN        &kp LEFT         &kp DOWN    &kp RIGHT  &kp LEFT_BRACKET  &kp RIGHT_BRACKET
-&trans      &rgb_ug RGB_OFF  &rgb_ug RGB_ON  &rgb_ug RGB_EFF  &rgb_ug RGB_EFR  &rgb_ug RGB_SPI    &mmv MOVE_RIGHT  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp INSERT  &kp F11    &kp F12           &trans
-&kp C_MUTE  &trans           &trans          &trans           &trans           &trans             &mkp LCLK        &trans           &trans           &trans      &trans     &trans
+                &kp GRAVE       &kp F1           &kp F2             &kp F3              &kp F4           &kp F5             &mmv MOVE_UP        &kp F6           &kp F7         &kp F8          &kp F9       &kp F10            &trans
+                &trans          &trans           &mkp LCLK          &mkp MCLK           &mkp RCLK        &mkp MB4           &mmv MOVE_DOWN      &kp PG_UP        &kp END        &kp UP          &kp HOME     &kp MINUS          &kp EQUAL
+                &trans          &kp TILDE        &rgb_ug RGB_BRI    &rgb_ug RGB_BRD     &trans           &mkp MB5           &mmv MOVE_LEFT      &kp PG_DN        &kp LEFT       &kp DOWN        &kp RIGHT    &kp LEFT_BRACKET    &kp RIGHT_BRACKET
+                &trans          &rgb_ug RGB_OFF  &rgb_ug RGB_ON     &rgb_ug RGB_EFF     &rgb_ug RGB_EFR  &rgb_ug RGB_SPI    &mmv MOVE_RIGHT     &kp INSERT       &kp F11        &kp F12         &trans       &kp BSLH           &trans
+                &mkp MCLK       &trans           &trans             &trans              &trans           &trans             &mkp LCLK           &trans           &trans         &trans          &trans       &trans
             >;
 
-            sensor-bindings = <&rsr_vol &rsr_trans>;
+            /* Layer 1 encoder rotation scrolls; clicking sends middle-click. */
+            sensor-bindings = <&scroll_encoder &rsr_trans>;
             display-name = "LAYER1";
         };
 
         layer_2 {
+            /*
+             * Connectivity and system controls. The joystick becomes a window
+             * and tab switcher: up Alt+Tab, down Alt+Esc, right Ctrl+Tab,
+             * left Ctrl+Shift+Tab, and click Win+Tab.
+             */
             bindings = <
-&kp TILDE  &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4    &mmv MOVE_UP     &kp F6  &kp F7  &kp F8      &kp F9     &kp F10      &trans
-&trans     &bt BT_CLR    &bt BT_CLR_ALL  &trans        &trans        &trans          &mmv MOVE_DOWN   &trans  &trans  &kp F11     &kp F12    &kp UNDER    &kp PLUS
-&trans     &out OUT_USB  &out OUT_BLE    &trans        &trans        &trans          &mmv MOVE_LEFT   &trans  &trans  &trans      &trans     &kp LBRC     &kp RBRC
-&trans     &sys_reset    &trans          &bootloader   &trans        &trans          &mmv MOVE_RIGHT  &trans  &trans  &sys_reset  &soft_off  &bootloader  &trans
-&trans     &trans        &trans          &trans        &trans        &trans          &mkp LCLK        &trans  &trans  &trans      &trans     &trans
+                &status_profile &bt BT_SEL 0    &bt BT_SEL 1        &bt BT_SEL 2      &bt BT_SEL 3      &bt BT_SEL 4        &ALT_TAB            &kp F6          &kp F7          &kp F8          &kp F9      &kp F10             &trans
+                &status_battery &bt BT_CLR      &bt BT_CLR_ALL      &bt BT_DISC 0     &bt BT_DISC 1     &trans              &ALT_ESC            &trans          &trans          &kp F11         &kp F12     &trans              &trans
+                &trans          &out OUT_USB    &out OUT_BLE        &trans            &trans            &trans              &CTRL_SHIFT_TAB     &trans          &trans          &trans          &trans      &trans              &trans
+                &trans          &sys_reset      &trans              &bootloader       &trans            &trans              &CTRL_TAB           &trans          &trans          &sys_reset      &soft_off   &bootloader         &trans
+                &RESET_ZOOM     &trans          &trans              &trans            &trans            &trans              &GUI_TAB            &trans          &trans          &trans          &trans      &trans
             >;
 
             display-name = "LAYER2";
-            sensor-bindings = <&rsr_vol &rsr_trans>;
-        };
-
-        layer_3 {
-            bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
-            >;
-
-            display-name = "LAYER3";
-            sensor-bindings = <&rsr_vol &rsr_trans>;
-        };
-
-        layer_4 {
-            bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
-            >;
-
-            display-name = "LAYER4";
-            sensor-bindings = <&rsr_vol &rsr_trans>;
+            /* Layer 2 encoder rotation zooms; clicking resets application zoom. */
+            sensor-bindings = <&rsr_zoom &rsr_trans>;
         };
     };
 };

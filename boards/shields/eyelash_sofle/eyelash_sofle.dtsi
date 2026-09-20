@@ -13,10 +13,27 @@
     chosen {
         zmk,kscan = &kscan0;
         zmk,battery = &vbatt;
-        zmk,underglow = &led_strip;
+        zmk,underglow = &led_overlay;
         zmk,backlight = &backlight;
         zmk,physical-layout = &eyelash_sofle_layout;
 
+    };
+
+    status_leds: status_leds {
+        compatible = "eyelash,status-leds";
+        zero-led-index = <0>;
+        one-led-index = <1>;
+        two-led-index = <2>;
+        three-led-index = <3>;
+        four-led-index = <4>;
+        five-led-index = <5>;
+        six-led-index = <6>;
+    };
+
+    led_overlay: led_overlay {
+        compatible = "eyelash,led-strip-overlay";
+        target = <&led_strip>;
+        chain-length = <7>;
     };
 
     backlight: pwmleds {
@@ -114,29 +131,115 @@
     };
 };
 
+/*
+ * Sofle ZMK - WS2812 RGB LED configuration
+ *
+ * Cada metade do teclado possui 29 LEDs WS2812.
+ *
+ * IMPORTANTE:
+ * Este arquivo configura UMA metade do teclado por firmware.
+ * Como o Sofle é split, o mesmo arquivo pode ser usado/configurado
+ * para cada lado, desde que o SPI/pinos usados sejam os mesmos.
+ *
+ * O chain-length = <29> informa ao driver que existem 29 LEDs
+ * endereçáveis individualmente na cadeia WS2812.
+ *
+ * Exemplo da cadeia física:
+ *
+ *   MCU -> LED 0 -> LED 1 -> LED 2 -> ... -> LED 27 -> LED 28
+ *
+ * Cada LED pode receber uma cor diferente. O índice lógico do LED
+ * não precisa necessariamente corresponder à ordem visual das teclas;
+ * isso depende de como os LEDs foram ligados fisicamente no PCB.
+ */
+
 &spi3 {
+    /*
+     * Usa o periférico SPI3 do nRF para gerar o sinal necessário
+     * para os LEDs WS2812.
+     */
     compatible = "nordic,nrf-spim";
     status = "okay";
 
+    /*
+     * Seleciona os pinos usados pelo SPI3.
+     *
+     * spi3_default = configuração normal dos pinos.
+     * spi3_sleep   = configuração usada quando o periférico entra
+     *                em estado de baixo consumo.
+     */
     pinctrl-0 = <&spi3_default>;
     pinctrl-1 = <&spi3_sleep>;
     pinctrl-names = "default", "sleep";
 
+    /*
+     * Define a cadeia de LEDs WS2812 conectada ao SPI3.
+     */
     led_strip: ws2812@0 {
+        /*
+         * Driver do ZMK/Zephyr para WS2812 controlado através de SPI.
+         */
         compatible = "worldsemi,ws2812-spi";
 
-        /* SPI */
-        reg = <0>; /* ignored, but necessary for SPI bindings */
+        /*
+         * Necessário pelo binding de SPI.
+         * Para este dispositivo, o valor não representa um LED específico.
+         */
+        reg = <0>;
+
+        /*
+         * Frequência usada pelo SPI para codificar os bits do protocolo
+         * WS2812.
+         */
         spi-max-frequency = <4000000>;
 
-        /* WS2812 */
-        chain-length = <7>; /* 6 keys have underglow at the moment */
+        /*
+         * CADA METADE possui 29 LEDs.
+         *
+         * Portanto:
+         *
+         *   LED 0
+         *   LED 1
+         *   ...
+         *   LED 28
+         *
+         * Total = 29 LEDs.
+         *
+         * Não coloque 58 aqui. O firmware de cada metade controla
+         * sua própria cadeia de 29 LEDs.
+         */
+        chain-length = <7>;
+
+        /*
+         * Representação de um bit "1" do protocolo WS2812 através
+         * de um frame SPI.
+         */
         spi-one-frame = <0x70>;
+
+        /*
+         * Representação de um bit "0" do protocolo WS2812 através
+         * de um frame SPI.
+         */
         spi-zero-frame = <0x40>;
 
-        color-mapping = <LED_COLOR_ID_GREEN LED_COLOR_ID_RED LED_COLOR_ID_BLUE>;
+        /*
+         * Define a ordem dos canais de cor do LED.
+         *
+         * Apesar de muitos LEDs serem chamados de RGB, o WS2812
+         * normalmente recebe os dados na ordem GRB.
+         *
+         * Portanto:
+         *   primeiro  -> Green
+         *   segundo   -> Red
+         *   terceiro  -> Blue
+         */
+        color-mapping =
+            <LED_COLOR_ID_GREEN
+             LED_COLOR_ID_RED
+             LED_COLOR_ID_BLUE>;
     };
 };
+
 
 zephyr_udc0: &usbd {
     compatible = "nordic,nrf-usbd";
@@ -156,4 +259,4 @@ nice_view_spi: &spi0 {
     pinctrl-1 = <&spi0_sleep>;
     pinctrl-names = "default", "sleep";
     cs-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
-};
+};              

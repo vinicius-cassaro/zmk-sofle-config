@@ -1,0 +1,17 @@
+menuconfig EYELASH_SOFLE_STATUS_LEDS
+    bool "Eyelash Sofle status LED overlays"
+    depends on ZMK_RGB_UNDERGLOW
+    select ZMK_HID_INDICATORS
+    default y if SHIELD_EYELASH_SOFLE_LEFT
+    help
+      Overlay Caps Lock, Bluetooth profile, and battery status on the
+      configured RGB groups without replacing the normal underglow frame.
+
+if EYELASH_SOFLE_STATUS_LEDS
+
+config EYELASH_SOFLE_STATUS_LED_PERIOD_MS
+    int "Status LED animation period (milliseconds)"
+    default 100
+    range 25 1000
+
+endif

@@ -1,30 +1,50 @@
 # Sofle
 
-- [Chinese](README.md)
-- [English](README_EN.md)
-
-## Update List
-
-- 2024/12/21
-  1. Added support for zmk-studio (just refresh the left hand to use).
-- 2024/10/24
-  1. Modified power supply mode to reduce power consumption.
-  2. Fixed the automatic shut-off feature for RGB power supply.
-- 2025/8/22
-  1. update the soft off.When you press the keys Q, S and Z simultaneously and hold them for 2 seconds, the keyboard will enter a deep sleep state and cannot be awakened by pressing the keys. This function can be used when carrying it outside. The activation method is to press the reset switch once.
-  2. This month, I also updated the ultra-thin versions of the corne and sofle cases. The frame and base plate have been thickened, and the opening of the reset switch has been adjusted, so that the reset switch can be easily pressed. At present, we are still conceptualizing how to design the shell with an inclined bracket.If you have carefully examined a PCB, you will notice that there are reserved interfaces for expansion IO. I wonder if anyone has been able to utilize them,I will try it！
-  3. The GIF animations on the right-hand keyboard screen have been removed, which will significantly reduce the power consumption of the right-hand keyboard.
- 
--2026/6/22
-The keyboard now supports key remapping via DYA STUDIO. Chinese users should contact the seller to obtain the Chinese version of the DYA STUDIO installer. This PC software offers better key remapping functionality than ZMK Studio. Website: https://studio.dya.cormoran.works/ https://studio.dya.cormoran.works/
-
-> If your  sofle was updated before 2025/8/22, please update to the latest firmware.
->
-
-## Contact Me
-
-For 3D printed model files or any issues and malfunctions with the keyboard, please contact [380465425@qq.com](mailto:380465425@qq.com)
-
 ## Sofle Keymap
 
-![Sofle键位图](keymap-drawer/eyelash_sofle.svg)
+![Sofle](keymap-drawer/eyelash_sofle.svg)
+
+## Keymap Configuration Guide
+
+The active keyboard definition is
+[`config/eyelash_sofle.keymap`](config/eyelash_sofle.keymap). Its `bindings`
+arrays follow the physical matrix rather than the labels in the keymap image:
+each of the first four rows contains the six left-hand keys, the joystick
+direction, and the six right-hand keys. The final row contains thumb keys and
+the joystick click. `&kp` sends a normal HID key, `&mo` enables a layer while
+held, `&trans` inherits the key from a lower active layer, and `&mkp` sends a
+mouse button.
+
+| Section | What it configures |
+|---|---|
+| Pointing settings (`&mmv`, `&msc`) | Joystick pointer speed, acceleration, and scroll scaling. |
+| `scroll_encoder`, `rsr_vol`, and `rsr_trans` | Encoder rotation behaviors: scrolling, volume changes, and transparent pass-through. |
+| `softoff` combo | Holding Q, S, and Z together for two seconds enters deep sleep. |
+| Macros | Modifier-safe shortcuts for Layer 2 joystick actions: Alt+Tab, Alt+Esc, Ctrl+Tab, Ctrl+Shift+Tab, and Win+Tab. |
+| `layer0` | Daily typing layout, arrows on the joystick, and volume on encoder rotation. |
+| `layer_1` | Function keys, navigation, mouse buttons/movement, RGB controls, and encoder scrolling with middle-click. |
+| `layer_2` | Bluetooth profile/clear actions, USB/BLE output selection, system controls, joystick shortcuts, and encoder zoom/reset. |
+
+The board wiring and LED strip are defined in
+[`boards/shields/eyelash_sofle/eyelash_sofle.dtsi`](boards/shields/eyelash_sofle/eyelash_sofle.dtsi).
+It selects the 7-pixel WS2812 strip, battery source, matrix transform,
+external RGB power switch, display SPI bus, and optional encoder.
+[`config/eyelash_sofle.conf`](config/eyelash_sofle.conf) enables the ZMK
+features used by the keymap, including RGB underglow, pointing, encoder,
+soft-off, and power-management settings.
+
+### LED Status Effects
+
+The seven physical RGB groups remain controlled by ZMK's normal underglow
+renderer. `src/rgb_overlay.c` overlays status colors only on the configured
+groups, so RGB brightness, color, and effect controls remain available.
+
+| Event or Layer 2 action | LED effect |
+|---|---|
+| Host Caps Lock LED report | The configured Caps Lock group lights white while Caps Lock is active. |
+| Layer 2 + ESC | The configured ESC group flashes the active Bluetooth profile, then lights blue when connected. |
+| Layer 2 + TAB | The configured TAB group shows green above 60%, yellow from 30–60%, and red below 30%, for three seconds. |
+
+The PCB exposes seven independently addressable RGB groups, not 29 per-key
+LEDs. The initial group indices are `ESC = 0`, `TAB = 1`, and `Caps Lock = 2`;
+adjust these values in the `status_leds` node if the physical group order differs.

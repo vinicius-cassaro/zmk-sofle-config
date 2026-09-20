@@ -1,0 +1,26 @@
+description: LED groups used by Eyelash Sofle status indicators
+
+compatible: "eyelash,status-leds"
+
+properties:
+  six-led-index:
+    type: int
+    required: true
+  zero-led-index:
+    type: int
+    required: true
+  one-led-index:
+    type: int
+    required: true
+  two-led-index:
+    type: int
+    required: true
+  three-led-index:
+    type: int
+    required: true
+  four-led-index:
+    type: int
+    required: true
+  five-led-index:
+    type: int
+    required: true

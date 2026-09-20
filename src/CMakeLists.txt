@@ -1,0 +1,7 @@
+if(CONFIG_SHIELD_EYELASH_SOFLE_LEFT OR CONFIG_SHIELD_EYELASH_SOFLE_RIGHT)
+  target_sources(app PRIVATE rgb_overlay.c)
+endif()
+
+if(CONFIG_EYELASH_SOFLE_STATUS_LEDS AND CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+  target_sources(app PRIVATE status_leds.c)
+endif()

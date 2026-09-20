@@ -1,0 +1,11 @@
+description: Eyelash Sofle status LED display behavior
+
+compatible: "zmk,behavior-eyelash-status-led"
+
+include: zero_param.yaml
+
+properties:
+  action:
+    type: int
+    required: true
+    description: 0 displays Bluetooth profile status; 1 displays battery status.

@@ -1,0 +1,13 @@
+description: Eyelash Sofle RGB status overlay strip
+
+compatible: "eyelash,led-strip-overlay"
+
+properties:
+  target:
+    type: phandle
+    required: true
+    description: Physical LED strip that receives completed RGB frames.
+  chain-length:
+    type: int
+    required: true
+    description: Number of independently addressable RGB groups.
