@@ -56,14 +56,12 @@
             compatible = "zmk,behavior-eyelash-status-led";
             #binding-cells = <0>;
             action = <0>;
-            label = "STATUS_PROFILE";
         };
 
         status_battery: status_battery {
             compatible = "zmk,behavior-eyelash-status-led";
             #binding-cells = <0>;
             action = <1>;
-            label = "STATUS_BATTERY";
         };
 
         rsr_vol: rsr_vol {
@@ -114,8 +112,6 @@
                 <&macro_pause_for_release>,
                 <&macro_release>,
                 <&kp LEFT_SHIFT &mkp MB3>;
-
-            label = "SHIFT_MCLK";
         };
 
         ALT_TAB: ALT_TAB {
@@ -128,7 +124,6 @@
                 <&kp TAB>,
                 <&macro_release>,
                 <&kp LEFT_ALT>;
-            label = "ALT_TAB";
         };
 
         ALT_ESC: ALT_ESC {
@@ -141,7 +136,6 @@
                 <&kp ESC>,
                 <&macro_release>,
                 <&kp LEFT_ALT>;
-            label = "ALT_ESC";
         };
 
         CTRL_TAB: CTRL_TAB {
@@ -154,7 +148,6 @@
                 <&kp TAB>,
                 <&macro_release>,
                 <&kp LCTRL>;
-            label = "CTRL_TAB";
         };
 
         CTRL_SHIFT_TAB: CTRL_SHIFT_TAB {
@@ -167,7 +160,6 @@
                 <&kp TAB>,
                 <&macro_release>,
                 <&kp LCTRL &kp LEFT_SHIFT>;
-            label = "CTRL_SHIFT_TAB";
         };
 
         GUI_TAB: GUI_TAB {
@@ -180,7 +172,6 @@
                 <&kp TAB>,
                 <&macro_release>,
                 <&kp LEFT_GUI>;
-            label = "GUI_TAB";
         };
 
         ZOOM_IN: ZOOM_IN {
@@ -193,7 +184,6 @@
                 <&kp PLUS>,
                 <&macro_release>,
                 <&kp LCTRL>;
-            label = "ZOOM_IN";
         };
 
         ZOOM_OUT: ZOOM_OUT {
@@ -206,7 +196,6 @@
                 <&kp MINUS>,
                 <&macro_release>,
                 <&kp LCTRL>;
-            label = "ZOOM_OUT";
         };
 
         RESET_ZOOM: RESET_ZOOM {
@@ -219,7 +208,6 @@
                 <&kp N0>,
                 <&macro_release>,
                 <&kp LCTRL>;
-            label = "RESET_ZOOM";
         };
 
         TAB_LED: TAB_LED {
