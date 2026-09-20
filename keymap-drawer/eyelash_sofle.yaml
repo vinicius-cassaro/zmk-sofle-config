@@ -14,7 +14,7 @@ layers:
   - {t: '9', s: (}
   - {t: '0', s: )}
   - $$mdi:backspace-reverse-outline$$
-  - '&TAB_LED'
+  - $$mdi:keyboard-tab$$
   - Q
   - W
   - E
