@@ -13,7 +13,7 @@
     chosen {
         zmk,kscan = &kscan0;
         zmk,battery = &vbatt;
-        zmk,underglow = &led_overlay;
+        zmk,underglow = &led_strip;
         zmk,backlight = &backlight;
         zmk,physical-layout = &eyelash_sofle_layout;
 
@@ -179,6 +179,8 @@
          * Driver do ZMK/Zephyr para WS2812 controlado através de SPI.
          */
         compatible = "worldsemi,ws2812-spi";
+
+        status = "okay";
 
         /*
          * Necessário pelo binding de SPI.
