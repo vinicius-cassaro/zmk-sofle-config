@@ -1,3 +1,4 @@
 build:
   settings:
-     board_root: .
+    board_root: .
+    dts_root: .
