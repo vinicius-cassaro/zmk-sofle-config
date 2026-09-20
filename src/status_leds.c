@@ -42,7 +42,8 @@ BUILD_ASSERT(FOUR_LED_INDEX < STRIP_LENGTH, "four_led_index exceeds the strip le
 BUILD_ASSERT(FIVE_LED_INDEX < STRIP_LENGTH, "five_led_index exceeds the strip length");
 BUILD_ASSERT(SIX_LED_INDEX < STRIP_LENGTH, "six_led_index exceeds the strip length");
 
-struct status_led_state {
+struct status_led_state
+{
     bool caps_lock;
     bool usb_powered;
     bool battery_charging;
@@ -64,11 +65,13 @@ static const struct led_rgb led_black = {.r = 0, .g = 0, .b = 0};
 static void render_status_leds(struct k_work *work);
 K_WORK_DELAYABLE_DEFINE(status_led_work, render_status_leds);
 
-static void request_render(k_timeout_t delay) {
+static void request_render(k_timeout_t delay)
+{
     k_work_reschedule(&status_led_work, delay);
 }
 
-static void clear_transient_overlays(void) {
+static void clear_transient_overlays(void)
+{
     eyelash_rgb_overlay_clear(ZERO_LED_INDEX);
     eyelash_rgb_overlay_clear(ONE_LED_INDEX);
     eyelash_rgb_overlay_clear(TWO_LED_INDEX);
@@ -78,16 +81,17 @@ static void clear_transient_overlays(void) {
     eyelash_rgb_overlay_clear(SIX_LED_INDEX);
 }
 
-// static void render_caps_lock(void) {
-//     if (state.caps_lock) {
-//         eyelash_rgb_overlay_set(SIX_LED_INDEX, led_red);
-//         zmk_rgb_set(rgb_colors, 29);
-//     } else {
-//         eyelash_rgb_overlay_clear(SIX_LED_INDEX);
-//     }
-// }
+static void render_caps_lock(void) {
+    if (state.caps_lock) {
+        eyelash_rgb_overlay_set(SIX_LED_INDEX, led_red);
+        zmk_rgb_set(rgb_colors, 29);
+    } else {
+        eyelash_rgb_overlay_clear(SIX_LED_INDEX);
+    }
+}
 
-static struct led_rgb pulse_color(struct led_rgb color, int64_t elapsed_ms) {
+static struct led_rgb pulse_color(struct led_rgb color, int64_t elapsed_ms)
+{
     const uint32_t phase = elapsed_ms % 2000U;
     const uint8_t brightness =
         64U + ((phase <= 1000U ? phase : 2000U - phase) * 191U / 1000U);
@@ -98,13 +102,16 @@ static struct led_rgb pulse_color(struct led_rgb color, int64_t elapsed_ms) {
     return color;
 }
 
-static void render_bluetooth(int64_t now) {
+static void render_bluetooth(int64_t now)
+{
     const uint8_t flashes = zmk_ble_active_profile_index() + 1U;
     const int64_t elapsed = now - state.display_started_at;
     const int64_t flash_window = flashes * 500U;
 
-    if (elapsed < flash_window) {
-        if ((elapsed % 500U) < 250U) {
+    if (elapsed < flash_window)
+    {
+        if ((elapsed % 500U) < 250U)
+        {
             eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_blue);
         }
         return;
@@ -112,10 +119,13 @@ static void render_bluetooth(int64_t now) {
 
     const struct zmk_endpoint_instance endpoint = zmk_endpoints_select();
 
-    if (endpoint == ZMK_ENDPOINT_BLE) {
-        if (zmk_ble_active_profile_is_connected()) {
+    if (endpoint.transport == ZMK_TRANSPORT_BLE)
+    {
+        if (zmk_ble_active_profile_is_connected())
+        {
 
-            switch (zmk_ble_active_profile_index()) {
+            switch (zmk_ble_active_profile_index())
+            {
             case 0:
                 eyelash_rgb_overlay_set(FIVE_LED_INDEX, led_blue);
                 break;
@@ -132,59 +142,84 @@ static void render_bluetooth(int64_t now) {
                 eyelash_rgb_overlay_set(ONE_LED_INDEX, led_blue);
                 break;
             }
-        } else if (zmk_ble_active_profile_is_open()) {
+        }
+        else if (zmk_ble_active_profile_is_open())
+        {
             eyelash_rgb_overlay_set(ZERO_LED_INDEX, pulse_color(led_blue, elapsed - flash_window));
-        } else if (((elapsed - flash_window) % 1000U) < 200U) {
+        }
+        else if (((elapsed - flash_window) % 1000U) < 200U)
+        {
             eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_blue);
         }
-    } else if (endpoint == ZMK_ENDPOINT_USB) {
+    }
+    else if (endpoint.transport == ZMK_TRANSPORT_USB)
+    {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_white);
     }
 }
 
-static void render_battery(void) {
-    if (state.battery_charging) {
+static void render_battery(void)
+{
+    if (state.battery_charging)
+    {
         eyelash_rgb_overlay_set(
             ZERO_LED_INDEX, pulse_color(led_white, k_uptime_get() - state.display_started_at));
-    } else if (state.usb_powered) {
+    }
+    else if (state.usb_powered)
+    {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_white);
-    } else if (state.battery_level > 60U) {
+    }
+    else if (state.battery_level > 60U)
+    {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_green);
-    } else if (state.battery_level >= 30U) {
+    }
+    else if (state.battery_level >= 30U)
+    {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_yellow);
-    } else if (state.battery_level >= 15U) {
+    }
+    else if (state.battery_level >= 15U)
+    {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_red);
-    } else {
+    }
+    else
+    {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, pulse_color(led_blue, k_uptime_get() - state.display_started_at));
     }
 }
 
-static void render_status_leds(struct k_work *work) {
+static void render_status_leds(struct k_work *work)
+{
     const int64_t now = k_uptime_get();
 
     ARG_UNUSED(work);
     clear_transient_overlays();
     // render_caps_lock();
 
-    if (state.display == STATUS_LED_NONE) {
+    if (state.display == STATUS_LED_NONE)
+    {
         return;
     }
 
-    if (now >= state.display_until) {
+    if (now >= state.display_until)
+    {
         state.display = STATUS_LED_NONE;
         return;
     }
 
-    if (state.display == STATUS_LED_PROFILE) {
+    if (state.display == STATUS_LED_PROFILE)
+    {
         render_bluetooth(now);
         request_render(K_MSEC(CONFIG_EYELASH_SOFLE_STATUS_LED_PERIOD_MS));
-    } else {
+    }
+    else
+    {
         render_battery();
         request_render(K_TIMEOUT_ABS_MS(state.display_until));
     }
 }
 
-static void show_status(uint8_t display) {
+static void show_status(uint8_t display)
+{
     const int64_t now = k_uptime_get();
     int64_t visible_for = STATUS_LED_SHOW_MS;
 
@@ -195,7 +230,8 @@ static void show_status(uint8_t display) {
 }
 
 static int status_led_behavior_pressed(struct zmk_behavior_binding *binding,
-                                       struct zmk_behavior_binding_event event) {
+                                       struct zmk_behavior_binding_event event)
+{
     const struct device *dev = zmk_behavior_get_binding(binding->behavior_dev);
 
     ARG_UNUSED(event);
@@ -208,18 +244,20 @@ static const struct behavior_driver_api status_led_behavior_api = {
     .locality = BEHAVIOR_LOCALITY_EVENT_SOURCE,
 };
 
-#define STATUS_LED_BEHAVIOR(index)                                                               \
-    static const uint8_t status_led_behavior_config_##index = DT_INST_PROP(index, action);      \
-    BEHAVIOR_DT_INST_DEFINE(index, NULL, NULL, NULL,                                             \
-                            &status_led_behavior_config_##index, POST_KERNEL,                    \
+#define STATUS_LED_BEHAVIOR(index)                                                         \
+    static const uint8_t status_led_behavior_config_##index = DT_INST_PROP(index, action); \
+    BEHAVIOR_DT_INST_DEFINE(index, NULL, NULL, NULL,                                       \
+                            &status_led_behavior_config_##index, POST_KERNEL,              \
                             CONFIG_KERNEL_INIT_PRIORITY_DEFAULT, &status_led_behavior_api);
 
 DT_INST_FOREACH_STATUS_OKAY(STATUS_LED_BEHAVIOR)
 
-static int status_led_event_listener(const zmk_event_t *eh) {
+static int status_led_event_listener(const zmk_event_t *eh)
+{
     const struct zmk_hid_indicators_changed *hid = as_zmk_hid_indicators_changed(eh);
 
-    if (hid != NULL) {
+    if (hid != NULL)
+    {
         state.caps_lock = (hid->indicators & BIT(1)) != 0;
         request_render(K_NO_WAIT);
         return ZMK_EV_EVENT_BUBBLE;
@@ -227,16 +265,19 @@ static int status_led_event_listener(const zmk_event_t *eh) {
 
     const struct zmk_battery_state_changed *battery = as_zmk_battery_state_changed(eh);
 
-    if (battery != NULL) {
+    if (battery != NULL)
+    {
         state.battery_level = battery->state_of_charge;
-        if (state.display == STATUS_LED_BATTERY) {
+        if (state.display == STATUS_LED_BATTERY)
+        {
             request_render(K_NO_WAIT);
         }
         return ZMK_EV_EVENT_BUBBLE;
     }
 
     if (as_zmk_ble_active_profile_changed(eh) != NULL &&
-        state.display == STATUS_LED_PROFILE) {
+        state.display == STATUS_LED_PROFILE)
+    {
         show_status(STATUS_LED_PROFILE);
     }
 
@@ -248,7 +289,8 @@ ZMK_SUBSCRIPTION(eyelash_status_leds, zmk_hid_indicators_changed);
 ZMK_SUBSCRIPTION(eyelash_status_leds, zmk_battery_state_changed);
 ZMK_SUBSCRIPTION(eyelash_status_leds, zmk_ble_active_profile_changed);
 
-static int status_led_init(void) {
+static int status_led_init(void)
+{
     state.battery_level = zmk_battery_state_of_charge();
     request_render(K_NO_WAIT);
     return 0;
