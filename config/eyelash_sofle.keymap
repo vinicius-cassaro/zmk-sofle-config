@@ -19,12 +19,6 @@
 #include <dt-bindings/zmk/pointing.h>
 #include <dt-bindings/zmk/rgb.h>
 
-/* Scale joystick pointer movement before it is sent as a mouse report. */
-&mmv_input_listener { input-processors = <&zip_xy_scaler 2 1>; };
-
-/* Scale encoder-driven scrolling independently from pointer movement. */
-&msc_input_listener { input-processors = <&zip_scroll_scaler 2 1>; };
-
 &msc {
     acceleration-exponent = <1>;
     time-to-max-speed-ms = <100>;
