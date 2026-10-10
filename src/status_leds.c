@@ -3,7 +3,6 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
-#include <zephyr/drivers/behavior.h>
 
 #include <zmk/battery.h>
 #include <zmk/behavior.h>
