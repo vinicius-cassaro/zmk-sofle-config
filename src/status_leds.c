@@ -3,6 +3,7 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
+#include <drivers/behavior.h>
 
 #include <zmk/battery.h>
 #include <zmk/behavior.h>
@@ -194,7 +195,6 @@ static int status_led_behavior_pressed(struct zmk_behavior_binding *binding,
 
 static const struct behavior_driver_api status_led_behavior_api = {
     .binding_pressed = status_led_behavior_pressed,
-    .locality = BEHAVIOR_LOCALITY_EVENT_SOURCE,
 };
 
 #define STATUS_LED_BEHAVIOR(index)                                                          \
