@@ -107,7 +107,7 @@ static void render_bluetooth(int64_t now) {
         return;
     }
 
-    const struct zmk_endpoint_instance endpoint = zmk_endpoints_select();
+    const struct zmk_endpoint_instance endpoint = zmk_endpoints_selected();
 
     if (endpoint.transport == ZMK_TRANSPORT_BLE) {
         if (zmk_ble_active_profile_is_connected()) {
