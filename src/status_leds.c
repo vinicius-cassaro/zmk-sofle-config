@@ -46,8 +46,6 @@ BUILD_ASSERT(SIX_LED_INDEX < STRIP_LENGTH, "six_led_index exceeds the strip leng
 
 struct status_led_state {
     bool caps_lock;
-    bool usb_powered;
-    bool battery_charging;
     uint8_t battery_level;
     uint8_t display;
     int64_t display_started_at;
@@ -142,19 +140,12 @@ static void render_bluetooth(int64_t now) {
 }
 
 static void render_battery(void) {
-    if (state.battery_charging) {
-        eyelash_rgb_overlay_set(
-            ZERO_LED_INDEX, pulse_color(led_white, k_uptime_get() - state.display_started_at));
-    } else if (state.usb_powered) {
-        eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_white);
-    } else if (state.battery_level > 60U) {
+    if (state.battery_level > 60U) {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_green);
     } else if (state.battery_level >= 30U) {
         eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_yellow);
-    } else if (state.battery_level >= 15U) {
-        eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_red);
     } else {
-        eyelash_rgb_overlay_set(ZERO_LED_INDEX, pulse_color(led_blue, k_uptime_get() - state.display_started_at));
+        eyelash_rgb_overlay_set(ZERO_LED_INDEX, led_red);
     }
 }
 

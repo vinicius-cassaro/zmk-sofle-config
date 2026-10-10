@@ -48,3 +48,16 @@ groups, so RGB brightness, color, and effect controls remain available.
 The PCB exposes seven independently addressable RGB groups, not 29 per-key
 LEDs. The initial group indices are `ESC = 0`, `TAB = 1`, and `Caps Lock = 2`;
 adjust these values in the `status_leds` node if the physical group order differs.
+
+### Bluetooth Pairing
+
+Secure passkey entry is enabled on the central (left) half. To pair a new
+computer or phone, hold the Layer 2 thumb key and select a profile with
+`1` through `5`. Start adding the keyboard from the host's Bluetooth settings.
+When the host shows a six-digit passkey, type those digits on the keyboard and
+press Enter to accept; press Esc to cancel.
+
+Passkey entry changes the Bluetooth security state, so remove previous
+keyboard entries from the host and clear the matching keyboard profile before
+pairing again. Layer 2 + `Q` clears the active profile and Layer 2 + `W`
+clears every profile.
